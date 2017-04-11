@@ -1,22 +1,21 @@
-C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 16:38:46 PAGE 1   
+C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 20:38:50 PAGE 1   
 
 
 C51 COMPILER V9.53.0.0, COMPILATION OF MODULE FUNCTION_GENERATOR
 OBJECT MODULE PLACED IN .\src\function_generator.OBJ
-COMPILER INVOKED BY: c:\SiliconLabs\SimplicityStudio\v4\developer\toolchains\keil_8051\9.53\BIN\C51.exe C:\Users\varou\S
-                    -implicityStudio\v4_workspace1\Stop2\src\function_generator.c OMF2 SMALL DEBUG OBJECTEXTEND ROM(LARGE) WARNINGLEVEL(2) FL
-                    -OATFUZZY(3) OPTIMIZE(8,SPEED) DEFINE(DEBUG=1) INTVECTOR(0X0000) INTPROMOTE INCDIR(C:\Users\varou\SimplicityStudio\v4_wor
-                    -kspace1\Stop2\inc;C:\Users\varou\SimplicityStudio\v4_workspace1\Stop2\inc\config;C:\Users\varou\SimplicityStudio\v4_work
-                    -space1\Stop2\inc\graphics;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//Device/EFM8BB3/peripheral_drive
-                    -r/inc;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/bsp;C:/SiliconLabs/SimplicityStudio/v4/
-                    -developer/sdks/8051/v4.0.3//kits/EFM8BB3_SLSTK2022A/config;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3
-                    -//kits/common/drivers/efm8_memory_lcd/inc;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/dri
-                    -vers/efm8_memory_lcd/inc/graphics;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers/efm
-                    -8_memory_lcd/inc/config;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers/efm8_joystick
-                    -;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers/efm8_retargetserial;C:/SiliconLabs/S
-                    -implicityStudio/v4/developer/sdks/8051/v4.0.3//Device/shared/si8051base;C:/SiliconLabs/SimplicityStudio/v4/developer/sdk
-                    -s/8051/v4.0.3//Device/EFM8BB3/inc) PRINT(.\src\function_generator.lst) COND PAGEWIDTH(120) PAGELENGTH(65) OBJECT(.\src\f
-                    -unction_generator.OBJ)
+COMPILER INVOKED BY: c:\SiliconLabs\SimplicityStudio\v4\developer\toolchains\keil_8051\9.53\BIN\C51.exe C:\Users\student
+                    -\ECE251Project1\Stop2\src\function_generator.c OMF2 SMALL DEBUG OBJECTEXTEND ROM(LARGE) WARNINGLEVEL(2) FLOATFUZZY(3) OP
+                    -TIMIZE(8,SPEED) DEFINE(DEBUG=1) INTVECTOR(0X0000) INTPROMOTE INCDIR(C:\Users\student\ECE251Project1\Stop2\inc\graphics;C
+                    -:\Users\student\ECE251Project1\Stop2\inc;C:\Users\student\ECE251Project1\Stop2\inc\config;C:/SiliconLabs/SimplicityStudi
+                    -o/v4/developer/sdks/8051/v4.0.3//kits/common/bsp;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/EFM
+                    -8BB3_SLSTK2022A/config;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//Device/EFM8BB3/peripheral_driver/i
+                    -nc;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers/efm8_joystick;C:/SiliconLabs/Simpl
+                    -icityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers/efm8_memory_lcd/inc;C:/SiliconLabs/SimplicityStudio/v4/de
+                    -veloper/sdks/8051/v4.0.3//kits/common/drivers/efm8_memory_lcd/inc/graphics;C:/SiliconLabs/SimplicityStudio/v4/developer/
+                    -sdks/8051/v4.0.3//kits/common/drivers/efm8_memory_lcd/inc/config;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/
+                    -v4.0.3//Device/shared/si8051base;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//Device/EFM8BB3/inc;C:/Si
+                    -liconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers/efm8_retargetserial) PRINT(.\src\function_
+                    -generator.lst) COND PAGEWIDTH(120) PAGELENGTH(65) OBJECT(.\src\function_generator.OBJ)
 
 line level    source
 
@@ -63,9 +62,9 @@ line level    source
   41          
   42          #include "bsp.h"
   43          #include "tick.h"
-C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 16:38:46 PAGE 2   
-
   44          #include "disp.h"
+C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 20:38:50 PAGE 2   
+
   45          #include "render.h"
   46          #include "joystick.h"
   47          #include "thinfont.h"
@@ -128,9 +127,9 @@ line level    source
  102          // transitionDemoWaveform
  103          //-----------------------------------------------------------------------------
  104          //
-C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 16:38:46 PAGE 3   
-
  105          // Change function/waveform.
+C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 20:38:50 PAGE 3   
+
  106          // Left  - change function order: sine < square < triangle < sawtooth < windowed sine
  107          // Right - change function order: sine > square > triangle > sawtooth > windowed sine
  108          //
@@ -193,9 +192,9 @@ line level    source
  165   3                        currentDemoState = DEMO_SQUARE;
  166   3                        currentWaveform = square_bits;
  167   3                        currentTable = squareTable;
-C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 16:38:46 PAGE 4   
-
  168   3                        break;
+C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 20:38:50 PAGE 4   
+
  169   3      
  170   3                      case DEMO_SAWTOOTH:
  171   3                        currentDemoState = DEMO_TRIANGLE;
@@ -258,9 +257,9 @@ line level    source
  228          //
  229          // Get new ADC sample and return joystick direction. Valid return values:
  230          //  JOYSTICK_NONE   JOYSTICK_N   JOYSTICK_S
-C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 16:38:46 PAGE 5   
-
  231          //  JOYSTICK_C      JOYSTICK_E   JOYSTICK_W
+C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 20:38:50 PAGE 5   
+
  232          //
  233          static uint8_t getJoystick(void)
  234          {
@@ -323,9 +322,9 @@ line level    source
  291   2          transitionDemoFrequency(dir);
  292   2        }
  293   1      }
-C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 16:38:46 PAGE 6   
-
  294          
+C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 20:38:50 PAGE 6   
+
  295          //-----------------------------------------------------------------------------
  296          // drawScreenText
  297          //-----------------------------------------------------------------------------
@@ -388,9 +387,9 @@ line level    source
  354   1        for (i = 0; i < sine_height; i++)
  355   1        {
  356   2              RENDER_ClrLine(Line);
-C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 16:38:46 PAGE 7   
-
  357   2              RENDER_SpriteLine(Line, X_POS_WAVEFORM, i, currentWaveform, sine_width);
+C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 20:38:50 PAGE 7   
+
  358   2      
  359   2              if ((i >= Y_POS_NAV_ARROW_LEFT_RIGHT) && (i < Y_POS_NAV_ARROW_LEFT_RIGHT + nav_left_height))
  360   2              {
@@ -453,9 +452,9 @@ line level    source
  417          //
  418          static void drawScreenStaticSprites(void)
  419          {
-C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 16:38:46 PAGE 8   
-
  420   1        drawScreenSprite(nav_up_bits, nav_up_width, nav_up_height,
+C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 20:38:50 PAGE 8   
+
  421   1                                 X_POS_NAV_ARROW_UP_DOWN, Y_POS_NAV_ARROW_UP);
  422   1        drawScreenSprite(nav_down_bits, nav_down_width, nav_down_height,
  423   1                                 X_POS_NAV_ARROW_UP_DOWN, Y_POS_NAV_ARROW_DOWN);
@@ -518,9 +517,9 @@ line level    source
  480            DAC1H = DAC0H = temp.u8[MSB];
  481          } */
  482          
-C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 16:38:46 PAGE 9   
-
  483          //-----------------------------------------------------------------------------
+C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 20:38:50 PAGE 9   
+
  484          // PMATCH_ISR
  485          //-----------------------------------------------------------------------------
  486          //

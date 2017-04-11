@@ -1,22 +1,21 @@
-AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        03/17/17 15:03:47 PAGE     1
+AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        04/10/17 20:38:50 PAGE     1
 
 
 MACRO ASSEMBLER AX51 V3.12.0.0
 OBJECT MODULE PLACED IN .\src\SILABS_STARTUP.OBJ
-ASSEMBLER INVOKED BY: c:\SiliconLabs\SimplicityStudio\v4\developer\toolchains\keil_8051\9.53\BIN\AX51.exe C:\Users\varou
-                      \SimplicityStudio\v4_workspace1\EFM8BB3_FunctionGenerator\src\SILABS_STARTUP.A51 ERRORPRINT SET(SM
-                      ALL) DEBUG MACRO NOMOD51 INCDIR(C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//Dev
-                      ice/EFM8BB3/peripheral_driver/inc;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//k
-                      its/common/bsp;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/EFM8BB3_SLSTK20
-                      22A/config;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers/efm8
-                      _memory_lcd/inc;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers
-                      /efm8_memory_lcd/inc/graphics;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/
-                      common/drivers/efm8_memory_lcd/inc/config;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v
-                      4.0.3//kits/common/drivers/efm8_joystick;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4
-                      .0.3//kits/common/drivers/efm8_retargetserial;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/80
-                      51/v4.0.3//Device/shared/si8051base;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3/
-                      /Device/EFM8BB3/inc) PRINT(.\src\SILABS_STARTUP.lst) COND SYMBOLS PAGEWIDTH(120) PAGELENGTH(65) OB
-                      JECT(.\src\SILABS_STARTUP.OBJ) 
+ASSEMBLER INVOKED BY: c:\SiliconLabs\SimplicityStudio\v4\developer\toolchains\keil_8051\9.53\BIN\AX51.exe C:\Users\stude
+                      nt\ECE251Project1\Stop2\src\SILABS_STARTUP.A51 ERRORPRINT SET(SMALL) DEBUG MACRO NOMOD51 INCDIR(C:
+                      /SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/bsp;C:/SiliconLabs/Simpli
+                      cityStudio/v4/developer/sdks/8051/v4.0.3//kits/EFM8BB3_SLSTK2022A/config;C:/SiliconLabs/Simplicity
+                      Studio/v4/developer/sdks/8051/v4.0.3//Device/EFM8BB3/peripheral_driver/inc;C:/SiliconLabs/Simplici
+                      tyStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers/efm8_joystick;C:/SiliconLabs/Simplicit
+                      yStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers/efm8_memory_lcd/inc;C:/SiliconLabs/Simp
+                      licityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers/efm8_memory_lcd/inc/graphics;C:/Si
+                      liconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers/efm8_memory_lcd/inc/
+                      config;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//Device/shared/si8051base;C:/
+                      SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//Device/EFM8BB3/inc;C:/SiliconLabs/Simp
+                      licityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers/efm8_retargetserial) PRINT(.\src\S
+                      ILABS_STARTUP.lst) COND SYMBOLS PAGEWIDTH(120) PAGELENGTH(65) OBJECT(.\src\SILABS_STARTUP.OBJ) 
 
 LOC    OBJ             LINE     SOURCE
 
@@ -62,9 +61,9 @@ LOC    OBJ             LINE     SOURCE
                          40     ; <o> PDATASTART: PDATA memory start address <0x0-0xFFFF> 
                          41     ;     <i> The absolute start address of PDATA memory
  0000                    42     PDATASTART      EQU     0H
-AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        03/17/17 15:03:47 PAGE     2
-
                          43     ;
+AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        04/10/17 20:38:50 PAGE     2
+
                          44     ; <o> PDATALEN: PDATA memory size <0x0-0xFF> 
                          45     ;     <i> The length of PDATA memory in bytes.
  0000                    46     PDATALEN        EQU     0H
@@ -127,9 +126,9 @@ LOC    OBJ             LINE     SOURCE
                         103     ; </e>
                         104     ;------------------------------------------------------------------------------
                         105     
-AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        03/17/17 15:03:47 PAGE     3
-
                         106     ; Standard SFR Symbols 
+AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        04/10/17 20:38:50 PAGE     3
+
  00E0                   107     ACC     DATA    0E0H
  00F0                   108     B       DATA    0F0H
  0081                   109     SP      DATA    81H
@@ -192,9 +191,9 @@ LOC    OBJ             LINE     SOURCE
                                                 CLR     A
                                 PDATALOOP:      MOVX    @R0,A
                                                 INC     R0
-AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        03/17/17 15:03:47 PAGE     4
-
                                                 DJNZ    R7,PDATALOOP
+AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        04/10/17 20:38:50 PAGE     4
+
                                 ENDIF
                         171     
                         172     IF IBPSTACK <> 0
@@ -230,7 +229,7 @@ LOC    OBJ             LINE     SOURCE
 000009 020000     E     201                     LJMP    ?C_START
                         202     
                         203                     END
-AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        03/17/17 15:03:47 PAGE     5
+AX51 MACRO ASSEMBLER  SILABS_STARTUP                                                        04/10/17 20:38:50 PAGE     5
 
 SYMBOL TABLE LISTING
 ------ ----- -------

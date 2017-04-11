@@ -64,12 +64,17 @@
 #include "InitDevice.h"
 #include "disp.h"
 #include "function_generator.h"
-SI_SBIT(LED0, SFR_P1, 4);
+
+SI_SBIT(LEDG, SFR_P1, 4);
+SI_SBIT(LEDB, SFR_P1, 5);
+
 //---------------------------------------------------------------------------
 // main() Routine
 // --------------------------------------------------------------------------
+
 volatile double c=567.89;
-int tim=0;
+volatile uint16_t tim;
+
 int main(void)
 {
   enter_DefaultMode_from_RESET();
@@ -77,12 +82,20 @@ int main(void)
   // Enable all interrupts
   IE_EA = 1;
 
-  DISP_Init();
-  DISP_ClearAll();
+  //LEDR = 0;
+  //DISP_Init();
+  //DISP_ClearAll();
  // drawSplash();
+
+  TMR4RL = 65128;
+  tim  = 0;
+
   while(1){
-	  FunctionGenerator_main(c);
-	  IE_EA = 1;
+	  //FunctionGenerator_main(c);
+	  //IE_EA = 1;
+	  //LED0 = 1;
+	  WDTCN = 0xA5;
+	  //LED0 = 0;
   }
 
 
@@ -90,27 +103,33 @@ int main(void)
 
 SI_INTERRUPT (TIMER4_ISR, TIMER4_IRQn)
 {
-
-
   //TMR4CN0 &= ~TMR4CN0_TF4H__BMASK;
 	TMR4CN0_TF4H = 0;
-  c=c+0.0000001;
-  switch(tim)
-  {
-  case 0:
-	  LED0=1;
-	  break;
-  case 1:
-	  LED0=0;
-	  break;
-  }
+  //c=c+0.0000001;
 
-  if(tim>=1){
-	  tim=0;
-  }
-  else{
-	  tim++;
-  }
+	tim+=100;
+
+	if (tim > 32768) {
+  //switch(tim)
+  //{
+  //case 0:
+	  //LEDG = 1;
+	  LEDB = 0;
+//	  break;
+ // case 1:
+//	  LED0=0;
+//	  break;
+ } else {
+	 //LEDG = 0;
+	 LEDB = 1;
+ }
+
+  //if(tim>=1){
+//	  tim=0;
+ // }
+  //else{
+//	  tim++;
+ // }
 
 }
 
