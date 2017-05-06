@@ -39,11 +39,8 @@ volatile bool pressed=false;
 SI_INTERRUPT(PMATCH_ISR, PMATCH_IRQn)
 {
   uint8_t SFRPAGE_save = SFRPAGE;
-
   	  pressed=true;
-
-  SFRPAGE = PG2_PAGE;
-                    
+  SFRPAGE = PG2_PAGE;                    
   SFRPAGE = SFRPAGE_save;
 }
 
