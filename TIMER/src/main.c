@@ -59,9 +59,7 @@ void main(void)
 
 //	uint8_t modeSelected = 1;
 	enter_DefaultMode_from_RESET();
-	// Enable all interrupts
 	DISP_Init();
-	LEDG=0;
 	IE_EA = 1;	
 	 while(true){
 		 sprintf(ar,"TOT time %.2f sec",time);
