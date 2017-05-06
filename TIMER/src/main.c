@@ -63,11 +63,7 @@ void main(void)
 	DISP_Init();
 	LEDG=0;
 	IE_EA = 1;	
-	 sprintf(ar,"LAP time %.2f sec",time);
-	 DrawScreenText(ar, 10);
 	 while(true){
-		 IE_EA=1;
-		 WDTCN = 0xA5;
 		 sprintf(ar,"TOT time %.2f sec",time);
 		 DrawScreenText(ar, 10);
 		if(pressed==true){
