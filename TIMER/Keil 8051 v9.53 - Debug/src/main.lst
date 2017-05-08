@@ -1,0 +1,161 @@
+C51 COMPILER V9.53.0.0   MAIN                                                              04/24/2017 20:04:08 PAGE 1   
+
+
+C51 COMPILER V9.53.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\src\main.OBJ
+COMPILER INVOKED BY: c:\SiliconLabs\SimplicityStudio\v4\developer\toolchains\keil_8051\9.53\BIN\C51.exe C:\Users\varou\S
+                    -implicityStudio\v4_workspace1\TIMER\src\main.c OMF2 SMALL DEBUG OBJECTEXTEND ROM(LARGE) WARNINGLEVEL(2) FLOATFUZZY(3) OP
+                    -TIMIZE(8,SPEED) DEFINE(DEBUG=1) INTVECTOR(0X0000) INTPROMOTE INCDIR(C:\Users\varou\SimplicityStudio\v4_workspace1\TIMER\
+                    -inc\graphics;C:\Users\varou\SimplicityStudio\v4_workspace1\TIMER\inc;C:\Users\varou\SimplicityStudio\v4_workspace1\TIMER
+                    -\inc\config;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/bsp;C:/SiliconLabs/SimplicityStud
+                    -io/v4/developer/sdks/8051/v4.0.3//kits/EFM8BB3_SLSTK2022A/config;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/
+                    -v4.0.3//Device/EFM8BB3/peripheral_driver/inc;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/
+                    -drivers/efm8_memory_lcd/inc;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers/efm8_memo
+                    -ry_lcd/inc/graphics;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers/efm8_memory_lcd/i
+                    -nc/config;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//Device/shared/si8051base;C:/SiliconLabs/Simplic
+                    -ityStudio/v4/developer/sdks/8051/v4.0.3//Device/EFM8BB3/inc) PRINT(.\src\main.lst) COND PAGEWIDTH(120) PAGELENGTH(65) OB
+                    -JECT(.\src\main.OBJ)
+
+line level    source
+
+   1          
+   2          #include "bsp.h"
+   3          #include "pwr.h"
+   4          
+   5          #include "draw.h"
+   6          #include "tick.h"
+   7          #include "InitDevice.h"
+   8          #include <stdio.h>
+   9          
+  10          
+  11          //-----------------------------------------------------------------------------
+  12          // Local Definitions
+  13          //-----------------------------------------------------------------------------
+  14          
+  15          
+  16          
+  17          // Port Match ISR - Triggered on leading edge of UI_BTN_SELECT.
+  18          /*SI_INTERRUPT (PMATCH_ISR, PMATCH_IRQn)
+  19          {
+  20            // Turn on LED whenever UI_BTN_SELECT is pressed
+  21            BSP_LED_G = BSP_LED_ON;
+  22          }*/
+  23          
+  24          
+  25          SI_SBIT(LEDG, SFR_P1, 4);
+  26          volatile double time=0;
+  27          volatile double lap=0;
+  28          volatile double laps[5];
+  29          
+  30          SI_INTERRUPT_USING (TIMER4_ISR, TIMER4_IRQn, 1)
+  31          {
+  32   1      
+  33   1              //TMR4CN0_TF4H = 0;
+  34   1      
+  35   1      
+  36   1                  TMR4CN0_TF4H = 0;
+  37   1                      //TMR4CN0 &= ~TMR3CN0_TF3H__BMASK;
+  38   1      
+  39   1                      time+=0.0307692;
+  40   1                      lap+=0.0307692;
+  41   1      
+  42   1      }
+  43          volatile int index = 0;
+  44          volatile bool pressed=false;
+  45          SI_INTERRUPT(PMATCH_ISR, PMATCH_IRQn)
+C51 COMPILER V9.53.0.0   MAIN                                                              04/24/2017 20:04:08 PAGE 2   
+
+  46          {
+  47   1        uint8_t SFRPAGE_save = SFRPAGE;
+  48   1      
+  49   1       // if ((BSP_PB0 == BSP_PB_PRESSED)==false && (BSP_PB1 == BSP_PB_PRESSED)==false ){
+  50   1              //                 pressed=false;
+  51   1           //            }
+  52   1        //if((BSP_PB0 == BSP_PB_PRESSED))// && !pressed)// || (BSP_PB1 == BSP_PB_PRESSED && !pressed))
+  53   1       //{
+  54   1                //pressed=true;
+  55   1                pressed=true;
+  56   1      
+  57   1      
+  58   1      //  }
+  59   1        //LEDG=0;
+  60   1        SFRPAGE = PG2_PAGE;
+  61   1      
+  62   1        //EIE1 &= ~0x02;                     // Disable Port Match interrupts to
+  63   1                                           // prevent multiple interrupts from
+  64   1                                           // occurring while the button is
+  65   1                                           // pressed
+  66   1        SFRPAGE = SFRPAGE_save;
+  67   1      }
+  68          
+  69          //-----------------------------------------------------------------------------
+  70          // Example main()
+  71          //-----------------------------------------------------------------------------
+  72          
+  73          volatile char ar[22];
+  74          
+  75          void main(void)
+  76          {
+  77   1      
+  78   1      
+  79   1      //      uint8_t modeSelected = 1;
+  80   1              enter_DefaultMode_from_RESET();
+  81   1              // Enable all interrupts
+  82   1              DISP_Init();
+  83   1              LEDG=0;
+  84   1              IE_EA = 1;
+  85   1              //UI_getPowerMode(0);
+  86   1              // DrawScreenText(powerModeText[0], TEXT_ROW0_Y);
+  87   1      
+  88   1               sprintf(ar,"LAP time %.2f sec",time);
+  89   1               DrawScreenText(ar, 10);
+  90   1               while(true){
+  91   2                       //pressed=false;
+  92   2                       IE_EA=1;
+  93   2                       WDTCN = 0xA5;
+  94   2                       sprintf(ar,"TOT time %.2f sec",time);
+  95   2                       DrawScreenText(ar, 10);
+  96   2                      if(pressed==true){
+  97   3                              laps[index++]=lap;
+  98   3                              if(index>4){
+  99   4                                               index=0;
+ 100   4                                      }
+ 101   3                              lap=0;
+ 102   3                              sprintf(ar,"LAP 1 %.2f sec",laps[0]);
+ 103   3                              DrawScreenText(ar, 25);
+ 104   3                              sprintf(ar,"LAP 2 %.2f sec",laps[1]);
+ 105   3                              DrawScreenText(ar, 40);
+ 106   3                              sprintf(ar,"LAP 3 %.2f sec",laps[2]);
+ 107   3                              DrawScreenText(ar, 55);
+ 108   3                              sprintf(ar,"LAP 4 %.2f sec",laps[3]);
+C51 COMPILER V9.53.0.0   MAIN                                                              04/24/2017 20:04:08 PAGE 3   
+
+ 109   3                              DrawScreenText(ar, 70);
+ 110   3                              sprintf(ar,"LAP 5 %.2f sec",laps[4]);
+ 111   3                              DrawScreenText(ar, 85);
+ 112   3                              pressed=false;
+ 113   3                      }
+ 114   2      
+ 115   2               }
+ 116   1      }
+ 117          
+ 118          
+ 119          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    500    ----
+   CONSTANT SIZE    =    111    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     52    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

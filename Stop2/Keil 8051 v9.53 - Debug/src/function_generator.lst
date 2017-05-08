@@ -1,0 +1,585 @@
+C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 20:38:50 PAGE 1   
+
+
+C51 COMPILER V9.53.0.0, COMPILATION OF MODULE FUNCTION_GENERATOR
+OBJECT MODULE PLACED IN .\src\function_generator.OBJ
+COMPILER INVOKED BY: c:\SiliconLabs\SimplicityStudio\v4\developer\toolchains\keil_8051\9.53\BIN\C51.exe C:\Users\student
+                    -\ECE251Project1\Stop2\src\function_generator.c OMF2 SMALL DEBUG OBJECTEXTEND ROM(LARGE) WARNINGLEVEL(2) FLOATFUZZY(3) OP
+                    -TIMIZE(8,SPEED) DEFINE(DEBUG=1) INTVECTOR(0X0000) INTPROMOTE INCDIR(C:\Users\student\ECE251Project1\Stop2\inc\graphics;C
+                    -:\Users\student\ECE251Project1\Stop2\inc;C:\Users\student\ECE251Project1\Stop2\inc\config;C:/SiliconLabs/SimplicityStudi
+                    -o/v4/developer/sdks/8051/v4.0.3//kits/common/bsp;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/EFM
+                    -8BB3_SLSTK2022A/config;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//Device/EFM8BB3/peripheral_driver/i
+                    -nc;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers/efm8_joystick;C:/SiliconLabs/Simpl
+                    -icityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers/efm8_memory_lcd/inc;C:/SiliconLabs/SimplicityStudio/v4/de
+                    -veloper/sdks/8051/v4.0.3//kits/common/drivers/efm8_memory_lcd/inc/graphics;C:/SiliconLabs/SimplicityStudio/v4/developer/
+                    -sdks/8051/v4.0.3//kits/common/drivers/efm8_memory_lcd/inc/config;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/
+                    -v4.0.3//Device/shared/si8051base;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//Device/EFM8BB3/inc;C:/Si
+                    -liconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers/efm8_retargetserial) PRINT(.\src\function_
+                    -generator.lst) COND PAGEWIDTH(120) PAGELENGTH(65) OBJECT(.\src\function_generator.OBJ)
+
+line level    source
+
+   1          /**************************************************************************//**
+   2           * Copyright (c) 2015 by Silicon Laboratories Inc. All rights reserved.
+   3           *
+   4           * http://developer.silabs.com/legal/version/v11/Silicon_Labs_Software_License_Agreement.txt
+   5           *****************************************************************************/
+   6          ///////////////////////////////////////////////////////////////////////////////
+   7          // function_generator.c
+   8          ///////////////////////////////////////////////////////////////////////////////
+   9          
+  10          ///////////////////////////////////////////////////////////////////////////////
+  11          // Call Graph
+  12          //
+  13          // FunctionGenerator_main()
+  14          //  |
+  15          //  +- drawSplash()
+  16          //  |   +- getWaitJoystick()
+  17          //  |   |   +- getJoystick()
+  18          //  |
+  19          //  +- drawStaticSprites()
+  20          //  |   +- drawScreenSprite()
+  21          //  |
+  22          //  +- processInput()
+  23          //  |   +- transitionDemoWaveform()
+  24          //  |   +- transitionDemoFrequency()
+  25          //  |
+  26          //  +- drawScreen()
+  27          //  |   +- drawScreenWaveform()
+  28          //  |   +- drawScreenFrequency()
+  29          //  |       +- drawScreenText()
+  30          //  |
+  31          //  +- synchFrame()
+  32          //
+  33          // Timer4_ISR()
+  34          //
+  35          // PORTMATCH_ISR()
+  36          //
+  37          
+  38          ///////////////////////////////////////////////////////////////////////////////
+  39          // Includes
+  40          ///////////////////////////////////////////////////////////////////////////////
+  41          
+  42          #include "bsp.h"
+  43          #include "tick.h"
+  44          #include "disp.h"
+C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 20:38:50 PAGE 2   
+
+  45          #include "render.h"
+  46          #include "joystick.h"
+  47          #include "thinfont.h"
+  48          #include "function_generator.h"
+  49          #include "sine.h"
+  50          #include "square.h"
+  51          #include "triangle.h"
+  52          #include "sawtooth.h"
+  53          #include "windowed_sine.h"
+  54          #include "nav_up.h"
+  55          #include "nav_down.h"
+  56          #include "nav_left.h"
+  57          #include "nav_right.h"
+  58          #include "waveform_tables.h"
+  59          #include "retargetserial.h"
+  60          
+  61          ///////////////////////////////////////////////////////////////////////////////
+  62          // Globals
+  63          ///////////////////////////////////////////////////////////////////////////////
+  64          
+  65          // Generic line buffer
+  66          SI_SEGMENT_VARIABLE(Line[DISP_BUF_SIZE], uint8_t, RENDER_LINE_SEG);
+  67          
+  68          double g=500.67;
+  69          
+  70          // Demo state variables
+  71          static DemoState currentDemoState = DEMO_SINE;
+  72          static SI_VARIABLE_SEGMENT_POINTER(currentTable, uint16_t, const SI_SEG_CODE) = sineTable; // current wave
+             -form table for DAC output
+  73          static SI_VARIABLE_SEGMENT_POINTER(currentWaveform, uint8_t, const SI_SEG_CODE) = sine_bits; // current wa
+             -veform picture
+  74          
+  75          // Frequency selection
+  76          #define SUPPORTED_NUM_FREQ 8
+  77          static SI_SEGMENT_VARIABLE(frequency[SUPPORTED_NUM_FREQ], uint16_t, SI_SEG_XDATA) = {
+  78                          10L,
+  79                          20L,
+  80                          50L,
+  81                          100L,
+  82                          200L,
+  83                          500L,
+  84                          1000L,
+  85                          2000L
+  86          };
+  87          
+  88          // Current Frequency Selection
+  89          static uint8_t currentFreqIndex = 3;
+  90          
+  91          // Phase offset (updated when frequency is changed)
+  92          static uint16_t phaseOffset = 100 * PHASE_PRECISION / SAMPLE_RATE_DAC;
+  93          
+  94          // Kill splash
+  95          KillSpash killSplashFlag = SHOW_SPLASH;
+  96          
+  97          ///////////////////////////////////////////////////////////////////////////////
+  98          // Supporting Functions
+  99          ///////////////////////////////////////////////////////////////////////////////
+ 100          
+ 101          //-----------------------------------------------------------------------------
+ 102          // transitionDemoWaveform
+ 103          //-----------------------------------------------------------------------------
+ 104          //
+ 105          // Change function/waveform.
+C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 20:38:50 PAGE 3   
+
+ 106          // Left  - change function order: sine < square < triangle < sawtooth < windowed sine
+ 107          // Right - change function order: sine > square > triangle > sawtooth > windowed sine
+ 108          //
+ 109          // dir - valid arguments are: JOYSTICK_E, JOYSTICK_W
+ 110          //
+ 111          static void transitionDemoWaveform(uint8_t dir)
+ 112          {
+ 113   1        if (dir == JOYSTICK_E)
+ 114   1        {
+ 115   2                switch (currentDemoState)
+ 116   2                {
+ 117   3                      case DEMO_SINE:
+ 118   3                        currentDemoState = DEMO_SQUARE;
+ 119   3                        currentWaveform = square_bits;
+ 120   3                        currentTable = squareTable;
+ 121   3                        break;
+ 122   3      
+ 123   3                      case DEMO_SQUARE:
+ 124   3                        currentDemoState = DEMO_TRIANGLE;
+ 125   3                        currentWaveform = triangle_bits;
+ 126   3                        currentTable = triangleTable;
+ 127   3                        break;
+ 128   3      
+ 129   3                      case DEMO_TRIANGLE:
+ 130   3                currentDemoState = DEMO_SAWTOOTH;
+ 131   3                        currentWaveform = sawtooth_bits;
+ 132   3                        currentTable = sawtoothTable;
+ 133   3                        break;
+ 134   3      
+ 135   3                      case DEMO_SAWTOOTH:
+ 136   3                        currentDemoState = DEMO_WINDOWED_SINE;
+ 137   3                        currentWaveform = windowed_sine_bits;
+ 138   3                        currentTable = windowedSineTable;
+ 139   3                        break;
+ 140   3      
+ 141   3                      case DEMO_WINDOWED_SINE:
+ 142   3                        currentDemoState = DEMO_SINE;
+ 143   3                        currentWaveform = sine_bits;
+ 144   3                        currentTable = sineTable;
+ 145   3                        break;
+ 146   3                }
+ 147   2        }
+ 148   1        else if (dir == JOYSTICK_W)
+ 149   1        {
+ 150   2                switch (currentDemoState)
+ 151   2                {
+ 152   3                      case DEMO_SINE:
+ 153   3                        currentDemoState = DEMO_WINDOWED_SINE;
+ 154   3                        currentWaveform = windowed_sine_bits;
+ 155   3                        currentTable = windowedSineTable;
+ 156   3                        break;
+ 157   3      
+ 158   3                      case DEMO_SQUARE:
+ 159   3                        currentDemoState = DEMO_SINE;
+ 160   3                        currentWaveform = sine_bits;
+ 161   3                        currentTable = sineTable;
+ 162   3                        break;
+ 163   3      
+ 164   3                      case DEMO_TRIANGLE:
+ 165   3                        currentDemoState = DEMO_SQUARE;
+ 166   3                        currentWaveform = square_bits;
+ 167   3                        currentTable = squareTable;
+ 168   3                        break;
+C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 20:38:50 PAGE 4   
+
+ 169   3      
+ 170   3                      case DEMO_SAWTOOTH:
+ 171   3                        currentDemoState = DEMO_TRIANGLE;
+ 172   3                        currentWaveform = triangle_bits;
+ 173   3                        currentTable = triangleTable;
+ 174   3                        break;
+ 175   3      
+ 176   3                      case DEMO_WINDOWED_SINE:
+ 177   3                        currentDemoState = DEMO_SAWTOOTH;
+ 178   3                        currentWaveform = sawtooth_bits;
+ 179   3                        currentTable = sawtoothTable;
+ 180   3                        break;
+ 181   3                }
+ 182   2        }
+ 183   1      }
+ 184          
+ 185          //-----------------------------------------------------------------------------
+ 186          // transitionDemoFrequency
+ 187          //-----------------------------------------------------------------------------
+ 188          //
+ 189          // Change frequency of the function.
+ 190          // Up   - increase frequency
+ 191          // Down - decrease frequency
+ 192          //
+ 193          // dir - valid arguments are: JOYSTICK_N, JOYSTICK_S
+ 194          //
+ 195          static void transitionDemoFrequency(uint8_t dir)
+ 196          {
+ 197   1        if (dir == JOYSTICK_N)
+ 198   1        {
+ 199   2                // increase freq
+ 200   2                if(currentFreqIndex == SUPPORTED_NUM_FREQ-1)
+ 201   2                {
+ 202   3                        currentFreqIndex = 0;
+ 203   3                }
+ 204   2                else
+ 205   2                {
+ 206   3                        currentFreqIndex++;
+ 207   3                }
+ 208   2        }
+ 209   1        else if (dir == JOYSTICK_S)
+ 210   1        {
+ 211   2                // decrease freq
+ 212   2                if (currentFreqIndex == 0)
+ 213   2                {
+ 214   3                        currentFreqIndex = SUPPORTED_NUM_FREQ-1;
+ 215   3                }
+ 216   2                else
+ 217   2                {
+ 218   3                        currentFreqIndex--;
+ 219   3                }
+ 220   2        }
+ 221   1      
+ 222   1        phaseOffset = frequency[currentFreqIndex] * PHASE_PRECISION / SAMPLE_RATE_DAC;
+ 223   1      }
+ 224          
+ 225          //-----------------------------------------------------------------------------
+ 226          // getJoystick
+ 227          //-----------------------------------------------------------------------------
+ 228          //
+ 229          // Get new ADC sample and return joystick direction. Valid return values:
+ 230          //  JOYSTICK_NONE   JOYSTICK_N   JOYSTICK_S
+ 231          //  JOYSTICK_C      JOYSTICK_E   JOYSTICK_W
+C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 20:38:50 PAGE 5   
+
+ 232          //
+ 233          static uint8_t getJoystick(void)
+ 234          {
+ 235   1        uint32_t mv;
+ 236   1        uint8_t dir;
+ 237   1      
+ 238   1        ADC0CN0_ADBUSY = 1;
+ 239   1        while (!ADC0CN0_ADINT);
+ 240   1        ADC0CN0_ADINT = 0;
+ 241   1      
+ 242   1        mv = ((uint32_t)ADC0) * 3300 / 1024;
+ 243   1      
+ 244   1        dir = JOYSTICK_convert_mv_to_direction(mv);
+ 245   1      
+ 246   1        return dir;
+ 247   1      }
+ 248          
+ 249          //-----------------------------------------------------------------------------
+ 250          // getWaitJoystick
+ 251          //-----------------------------------------------------------------------------
+ 252          //
+ 253          // Get joystick input. If joystick was moved, wait for release. Return joystick
+ 254          // direction. Valid return values:
+ 255          //  JOYSTICK_NONE   JOYSTICK_N   JOYSTICK_S
+ 256          //  JOYSTICK_C      JOYSTICK_E   JOYSTICK_W
+ 257          //
+ 258          static uint8_t getWaitJoystick(void)
+ 259          {
+ 260   1        uint8_t dir, dirSave;
+ 261   1      
+ 262   1        dir = getJoystick();
+ 263   1        dirSave = dir;
+ 264   1      
+ 265   1        // wait for release then transition
+ 266   1        while (dir != JOYSTICK_NONE)
+ 267   1        {
+ 268   2          dir = getJoystick();
+ 269   2        }
+ 270   1      
+ 271   1        return dirSave;
+ 272   1      }
+ 273          
+ 274          //-----------------------------------------------------------------------------
+ 275          // getJoystickDemo
+ 276          //-----------------------------------------------------------------------------
+ 277          //
+ 278          // Get and process joystick input.
+ 279          // Left/Right = change function/waveform
+ 280          // Up/Down    = change frequency
+ 281          //
+ 282          static void processInput(uint8_t dir)
+ 283          {
+ 284   1        // process input
+ 285   1        if ((dir == JOYSTICK_E) || (dir == JOYSTICK_W))
+ 286   1        {
+ 287   2          transitionDemoWaveform(dir);
+ 288   2        }
+ 289   1        else if ((dir == JOYSTICK_N) || (dir == JOYSTICK_S))
+ 290   1        {
+ 291   2          transitionDemoFrequency(dir);
+ 292   2        }
+ 293   1      }
+ 294          
+C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 20:38:50 PAGE 6   
+
+ 295          //-----------------------------------------------------------------------------
+ 296          // drawScreenText
+ 297          //-----------------------------------------------------------------------------
+ 298          //
+ 299          // Show one line of text on the screen
+ 300          //
+ 301          // str - pointer to string text (0 - 21 characters) to display
+ 302          // rowNum - row number of the screen (0 - 127)
+ 303          // fontScale - font scaler (1 - 4)
+ 304          //
+ 305          static void drawScreenText(SI_VARIABLE_SEGMENT_POINTER(str, char, RENDER_STR_SEG), uint8_t rowNum)
+ 306          {
+ 307   1        uint8_t i;
+ 308   1      
+ 309   1        for (i = 0; i < FONT_HEIGHT; i++)
+ 310   1        {
+ 311   2          RENDER_ClrLine(Line);
+ 312   2          RENDER_StrLine(Line, 4, i, str);
+ 313   2          DISP_WriteLine(rowNum + i, Line);
+ 314   2        }
+ 315   1      }
+ 316          
+ 317          //-----------------------------------------------------------------------------
+ 318          // drawScreenSprite
+ 319          //-----------------------------------------------------------------------------
+ 320          //
+ 321          // Displays a sprite on the screen
+ 322          //
+ 323          // sprite - pointer to sprite/picture
+ 324          // width  - width of sprite
+ 325          // height - height of sprite
+ 326          // xPos - beginning row number on the screen (0 - 127)
+ 327          // yPos - beginning col number on the screen (0 - 127)
+ 328          //
+ 329          static void drawScreenSprite(SI_VARIABLE_SEGMENT_POINTER(sprite, uint8_t, RENDER_SPRITE_SEG),
+ 330                                               uint8_t width, uint8_t height,
+ 331                                               uint8_t xPos, uint8_t yPos)
+ 332          {
+ 333   1        uint8_t i;
+ 334   1      
+ 335   1        for (i = 0; i < height; i++)
+ 336   1        {
+ 337   2          RENDER_ClrLine(Line);
+ 338   2          RENDER_SpriteLine(Line, xPos, i, sprite, width);
+ 339   2          DISP_WriteLine(yPos + i, Line);
+ 340   2        }
+ 341   1      }
+ 342          
+ 343          //-----------------------------------------------------------------------------
+ 344          // drawScreenWaveform
+ 345          //-----------------------------------------------------------------------------
+ 346          //
+ 347          // Draw screen waveform and left/right arrows
+ 348          //
+ 349          static void drawScreenWaveform(void)
+ 350          {
+ 351   1        uint8_t i; // row index for waveform sprite
+ 352   1        uint8_t j = 0; // row index for nav sprites
+ 353   1      
+ 354   1        for (i = 0; i < sine_height; i++)
+ 355   1        {
+ 356   2              RENDER_ClrLine(Line);
+ 357   2              RENDER_SpriteLine(Line, X_POS_WAVEFORM, i, currentWaveform, sine_width);
+C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 20:38:50 PAGE 7   
+
+ 358   2      
+ 359   2              if ((i >= Y_POS_NAV_ARROW_LEFT_RIGHT) && (i < Y_POS_NAV_ARROW_LEFT_RIGHT + nav_left_height))
+ 360   2              {
+ 361   3                RENDER_SpriteLine(Line, X_POS_NAV_ARROW_LEFT, j, nav_left_bits, nav_left_width);
+ 362   3                RENDER_SpriteLine(Line, X_POS_NAV_ARROW_RIGHT, j, nav_right_bits, nav_right_width);
+ 363   3                j++;
+ 364   3              }
+ 365   2              DISP_WriteLine(Y_POS_WAVEFORM + i, Line);
+ 366   2        }
+ 367   1      
+ 368   1      }
+ 369          
+ 370          //-----------------------------------------------------------------------------
+ 371          // drawScreenFrequency
+ 372          //-----------------------------------------------------------------------------
+ 373          //
+ 374          // Update the function frequency on the screen. Format:
+ 375          //   f = 1000 Hz
+ 376          //
+ 377          static void drawScreenFrequency(double t)
+ 378          {
+ 379   1        char freqStr[22];
+ 380   1      
+ 381   1        // display frequency on screen
+ 382   1        RETARGET_SPRINTF(freqStr, "total TIME = %f Hz", t);
+ 383   1      
+ 384   1        drawScreenText(freqStr, Y_POS_FREQ);
+ 385   1      }
+ 386          
+ 387          //-----------------------------------------------------------------------------
+ 388          // drawSplash
+ 389          //-----------------------------------------------------------------------------
+ 390          //
+ 391          // Display splash screen with instructions.
+ 392          //
+ 393          static void drawSplash(void)
+ 394          {
+ 395   1              uint16_t ticks = GetTickCount();
+ 396   1      
+ 397   1              drawScreenText(" __________________", 20);
+ 398   1              drawScreenText(" FUNCTION GENERATOR", 17);
+ 399   1      
+ 400   1              drawScreenText("USE SCOPE TO OBSERVE", 48);
+ 401   1              drawScreenText("    DAC OUTPUTS:", 58);
+ 402   1              drawScreenText("    P3.0 & P3.1", 74);
+ 403   1      
+ 404   1              // kill splash if timeout elapses, any button is pressed, or joystick
+ 405   1              // is moved in any direction
+ 406   1              while (((GetTickCount() - ticks) < SPASH_TIMEOUT) &&
+ 407   1                              (killSplashFlag == SHOW_SPLASH) &&
+ 408   1                              (getWaitJoystick() == JOYSTICK_NONE));
+ 409   1      }
+ 410          
+ 411          //-----------------------------------------------------------------------------
+ 412          // drawScreenStaticSprites
+ 413          //-----------------------------------------------------------------------------
+ 414          //
+ 415          // Draw static/non-changing sprites on screen. Static sprites are up and down
+ 416          // arrows. Left/right arrows are drawn with waveform.
+ 417          //
+ 418          static void drawScreenStaticSprites(void)
+ 419          {
+ 420   1        drawScreenSprite(nav_up_bits, nav_up_width, nav_up_height,
+C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 20:38:50 PAGE 8   
+
+ 421   1                                 X_POS_NAV_ARROW_UP_DOWN, Y_POS_NAV_ARROW_UP);
+ 422   1        drawScreenSprite(nav_down_bits, nav_down_width, nav_down_height,
+ 423   1                                 X_POS_NAV_ARROW_UP_DOWN, Y_POS_NAV_ARROW_DOWN);
+ 424   1      }
+ 425          
+ 426          //-----------------------------------------------------------------------------
+ 427          // drawScreen
+ 428          //-----------------------------------------------------------------------------
+ 429          //
+ 430          // Draw dynamic/changeable sprites and info (waveform and frequency) on screen.
+ 431          //
+ 432          static void drawScreen(double t)
+ 433          {
+ 434   1      //  drawScreenWaveform();
+ 435   1        drawScreenFrequency(t);
+ 436   1      }
+ 437          
+ 438          //-----------------------------------------------------------------------------
+ 439          // synchFrame
+ 440          //-----------------------------------------------------------------------------
+ 441          //
+ 442          // Delay until start of next frame
+ 443          //
+ 444          static void synchFrame(void)
+ 445          {
+ 446   1        static uint16_t lastTick = 0;
+ 447   1        uint16_t tick;
+ 448   1      
+ 449   1        // Render at 50 Hz
+ 450   1        while (((tick = GetTickCount()) - lastTick) < HZ_TO_MS(DEMO_FRAME_RATE));
+ 451   1        lastTick = tick;
+ 452   1      }
+ 453          
+ 454          ///////////////////////////////////////////////////////////////////////////////
+ 455          // Interrupt Service Routines
+ 456          ///////////////////////////////////////////////////////////////////////////////
+ 457          
+ 458          /*SI_INTERRUPT_USING (TIMER4_ISR, TIMER4_IRQn, 1)
+ 459          {
+ 460            static uint16_t phaseAcc = 0;       // Holds phase accumulator
+ 461          
+ 462            SI_UU16_t temp;   // The temporary value that holds
+ 463                                                                                    // value before being written
+ 464                                                                                    // to the DAC
+ 465            
+ 466            TMR4CN0 &= ~TMR3CN0_TF3H__BMASK;    // Clear Timer4 overflow flag
+ 467          
+ 468            phaseAcc += phaseOffset;            // Increment phase accumulator
+ 469          
+ 470            // Read the table value
+ 471            temp.u16 = currentTable[phaseAcc >> 8];
+ 472          
+ 473            // Set the value of <temp> to the next output of DAC at full-scale
+ 474            // amplitude. The rails are 0x000 and 0xFFF. DAC low byte must be
+ 475            // written first.
+ 476          
+ 477            SFRPAGE = PG4_PAGE;
+ 478          
+ 479            DAC1L = DAC0L = temp.u8[LSB];
+ 480            DAC1H = DAC0H = temp.u8[MSB];
+ 481          } */
+ 482          
+ 483          //-----------------------------------------------------------------------------
+C51 COMPILER V9.53.0.0   FUNCTION_GENERATOR                                                04/10/2017 20:38:50 PAGE 9   
+
+ 484          // PMATCH_ISR
+ 485          //-----------------------------------------------------------------------------
+ 486          //
+ 487          // The Port Match interrupt occurs whenever (Pn & PnMASK) != (PnMAT & PnMASK).
+ 488          // We must disable the interrupt and wait until the button is released in
+ 489          // main, or else the interrupt will trigger multiple times.  It is generally
+ 490          // not good practice to sit in an ISR for int32_t periods of time.
+ 491          //
+ 492          SI_INTERRUPT(PMATCH_ISR, PMATCH_IRQn)
+ 493          {
+ 494   1        uint8_t SFRPAGE_save = SFRPAGE;
+ 495   1      
+ 496   1        // Kill splash and run demo if user presses any button
+ 497   1        if((BSP_PB0 == BSP_PB_PRESSED) || (BSP_PB1 == BSP_PB_PRESSED))
+ 498   1        {
+ 499   2                killSplashFlag = KILL_SPLASH;
+ 500   2        }
+ 501   1      
+ 502   1        SFRPAGE = PG2_PAGE;
+ 503   1      
+ 504   1        EIE1 &= ~0x02;                     // Disable Port Match interrupts to
+ 505   1                                           // prevent multiple interrupts from
+ 506   1                                           // occurring while the button is
+ 507   1                                           // pressed
+ 508   1        SFRPAGE = SFRPAGE_save;
+ 509   1      }
+ 510          
+ 511          ///////////////////////////////////////////////////////////////////////////////
+ 512          // Driver Function
+ 513          ///////////////////////////////////////////////////////////////////////////////
+ 514          
+ 515          void FunctionGenerator_main(double t)
+ 516          {
+ 517   1              drawScreenFrequency(t);
+ 518   1      
+ 519   1        DISP_ClearAll();
+ 520   1       // drawScreenStaticSprites();
+ 521   1      
+ 522   1        while(1)
+ 523   1        {
+ 524   2       //   processInput(getWaitJoystick());
+ 525   2          drawScreen(t);
+ 526   2       //   synchFrame();
+ 527   2        }
+ 528   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    774    ----
+   CONSTANT SIZE    =   8331    ----
+   XDATA SIZE       =     32    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     15      43
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
