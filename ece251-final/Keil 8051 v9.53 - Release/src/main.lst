@@ -1,0 +1,148 @@
+C51 COMPILER V9.53.0.0   MAIN                                                              04/24/2017 18:38:33 PAGE 1   
+
+
+C51 COMPILER V9.53.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\src\main.OBJ
+COMPILER INVOKED BY: c:\SiliconLabs\SimplicityStudio\v4\developer\toolchains\keil_8051\9.53\BIN\C51.exe C:\Users\varou\S
+                    -implicityStudio\v4_workspace1\DDD\src\main.c OMF2 SMALL DEBUG OBJECTEXTEND ROM(LARGE) WARNINGLEVEL(2) FLOATFUZZY(3) OPTI
+                    -MIZE(9,SPEED) DEFINE(NDEBUG=1) INTVECTOR(0X0000) INTPROMOTE INCDIR(C:\Users\varou\SimplicityStudio\v4_workspace1\DDD\inc
+                    -\graphics;C:\Users\varou\SimplicityStudio\v4_workspace1\DDD\inc;C:\Users\varou\SimplicityStudio\v4_workspace1\DDD\inc\co
+                    -nfig;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/bsp;C:/SiliconLabs/SimplicityStudio/v4/d
+                    -eveloper/sdks/8051/v4.0.3//kits/EFM8BB3_SLSTK2022A/config;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3/
+                    -/Device/EFM8BB3/peripheral_driver/inc;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers
+                    -/efm8_memory_lcd/inc;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers/efm8_memory_lcd/
+                    -inc/graphics;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//kits/common/drivers/efm8_memory_lcd/inc/conf
+                    -ig;C:/SiliconLabs/SimplicityStudio/v4/developer/sdks/8051/v4.0.3//Device/shared/si8051base;C:/SiliconLabs/SimplicityStud
+                    -io/v4/developer/sdks/8051/v4.0.3//Device/EFM8BB3/inc) REGFILE(DDD.ORC) PRINT(.\src\main.lst) COND PAGEWIDTH(120) PAGELEN
+                    -GTH(65) OBJECT(.\src\main.OBJ)
+
+line level    source
+
+   1          
+   2          #include "bsp.h"
+   3          #include "pwr.h"
+   4          
+   5          #include "draw.h"
+   6          #include "tick.h"
+   7          #include "InitDevice.h"
+   8          #include "lights.asm"
+*** ERROR C129 IN LINE 1 OF C:\Users\varou\SimplicityStudio\v4_workspace1\DDD\src\lights.asm: missing ';' before 'LIGHTS
+             -'
+   9          #include <stdio.h>
+  10          
+  11          
+  12          //-----------------------------------------------------------------------------
+  13          // Local Definitions
+  14          //-----------------------------------------------------------------------------
+  15          
+  16          
+  17          
+  18          // Port Match ISR - Triggered on leading edge of UI_BTN_SELECT.
+  19          /*SI_INTERRUPT (PMATCH_ISR, PMATCH_IRQn)
+  20          {
+  21            // Turn on LED whenever UI_BTN_SELECT is pressed
+  22            BSP_LED_G = BSP_LED_ON;
+  23          }*/
+  24          
+  25          
+  26          SI_SBIT(LEDG, SFR_P1, 4);
+  27          volatile double time=0;
+  28          volatile double lap=0;
+  29          volatile double laps[5];
+  30          
+  31          SI_INTERRUPT_USING (TIMER4_ISR, TIMER4_IRQn, 1)
+  32          {
+  33          
+  34                  //TMR4CN0_TF4H = 0;
+  35          
+  36          
+  37                      TMR4CN0_TF4H = 0;
+  38                          //TMR4CN0 &= ~TMR3CN0_TF3H__BMASK;
+  39          
+  40                          time+=0.0307692;
+  41                          lap+=0.0307692;
+  42          
+  43          }
+C51 COMPILER V9.53.0.0   MAIN                                                              04/24/2017 18:38:33 PAGE 2   
+
+  44          volatile int index = 0;
+  45          volatile bool pressed=false;
+  46          SI_INTERRUPT(PMATCH_ISR, PMATCH_IRQn)
+  47          {
+  48            uint8_t SFRPAGE_save = SFRPAGE;
+  49          
+  50           // if ((BSP_PB0 == BSP_PB_PRESSED)==false && (BSP_PB1 == BSP_PB_PRESSED)==false ){
+  51                  //                 pressed=false;
+  52               //            }
+  53            //if((BSP_PB0 == BSP_PB_PRESSED))// && !pressed)// || (BSP_PB1 == BSP_PB_PRESSED && !pressed))
+  54           //{
+  55                    //pressed=true;
+  56                    pressed=true;
+  57          
+  58          
+  59          //  }
+  60            //LEDG=0;
+  61            SFRPAGE = PG2_PAGE;
+  62          
+  63            //EIE1 &= ~0x02;                     // Disable Port Match interrupts to
+  64                                               // prevent multiple interrupts from
+  65                                               // occurring while the button is
+  66                                               // pressed
+  67            SFRPAGE = SFRPAGE_save;
+  68          }
+  69          
+  70          //-----------------------------------------------------------------------------
+  71          // Example main()
+  72          //-----------------------------------------------------------------------------
+  73          
+  74          volatile char ar[22];
+  75          extern void a_func (void);
+  76          void main(void)
+  77          {
+  78                  a_func();
+  79          
+  80          //      uint8_t modeSelected = 1;
+  81                  enter_DefaultMode_from_RESET();
+  82                  // Enable all interrupts
+  83                  DISP_Init();
+  84                  LEDG=0;
+  85                  IE_EA = 1;
+  86                  //UI_getPowerMode(0);
+  87                  // DrawScreenText(powerModeText[0], TEXT_ROW0_Y);
+  88          
+  89                   sprintf(ar,"LAP time %.2f sec",time);
+  90                   DrawScreenText(ar, 10);
+  91                   while(true){
+  92                           //pressed=false;
+  93                           IE_EA=1;
+  94                           WDTCN = 0xA5;
+  95                           sprintf(ar,"TOT time %.2f sec",time);
+  96                           DrawScreenText(ar, 10);
+  97                          if(pressed==true){
+  98                                  laps[index++]=lap;
+  99                                  if(index>4){
+ 100                                                   index=0;
+ 101                                          }
+ 102                                  lap=0;
+ 103                                  sprintf(ar,"LAP 1 %.2f sec",laps[0]);
+ 104                                  DrawScreenText(ar, 25);
+ 105                                  sprintf(ar,"LAP 2 %.2f sec",laps[1]);
+ 106                                  DrawScreenText(ar, 40);
+C51 COMPILER V9.53.0.0   MAIN                                                              04/24/2017 18:38:33 PAGE 3   
+
+ 107                                  sprintf(ar,"LAP 3 %.2f sec",laps[2]);
+ 108                                  DrawScreenText(ar, 55);
+ 109                                  sprintf(ar,"LAP 4 %.2f sec",laps[3]);
+ 110                                  DrawScreenText(ar, 70);
+ 111                                  sprintf(ar,"LAP 5 %.2f sec",laps[4]);
+ 112                                  DrawScreenText(ar, 85);
+ 113                                  pressed=false;
+ 114                          }
+ 115          
+ 116                   }
+ 117          }
+ 118          
+ 119          
+ 120          
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  1 ERROR(S)
